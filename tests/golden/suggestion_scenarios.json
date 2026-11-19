@@ -1,0 +1,22 @@
+[
+  {"slot_date":"2026-01-05","slot_code":"lunch","fridge_terms":["poireau"],"recent_recipe_uuids":[]},
+  {"slot_date":"2026-01-06","slot_code":"dinner","fridge_terms":["carotte"],"recent_recipe_uuids":["r-soupe"]},
+  {"slot_date":"2026-02-03","slot_code":"lunch","fridge_terms":["lentille"],"recent_recipe_uuids":[]},
+  {"slot_date":"2026-02-04","slot_code":"dinner","fridge_terms":["courge"],"recent_recipe_uuids":["r-curry"]},
+  {"slot_date":"2026-03-10","slot_code":"lunch","fridge_terms":["epinard"],"recent_recipe_uuids":[]},
+  {"slot_date":"2026-03-11","slot_code":"dinner","fridge_terms":["riz"],"recent_recipe_uuids":["r-bowl"]},
+  {"slot_date":"2026-04-14","slot_code":"lunch","fridge_terms":["asperge"],"recent_recipe_uuids":[]},
+  {"slot_date":"2026-04-15","slot_code":"dinner","fridge_terms":["pois"],"recent_recipe_uuids":["r-risotto"]},
+  {"slot_date":"2026-05-12","slot_code":"lunch","fridge_terms":["fraise"],"recent_recipe_uuids":[]},
+  {"slot_date":"2026-05-13","slot_code":"dinner","fridge_terms":["tomate"],"recent_recipe_uuids":["r-salade"]},
+  {"slot_date":"2026-06-09","slot_code":"lunch","fridge_terms":["courgette"],"recent_recipe_uuids":[]},
+  {"slot_date":"2026-06-10","slot_code":"dinner","fridge_terms":["aubergine"],"recent_recipe_uuids":["r-ratatouille"]},
+  {"slot_date":"2026-07-07","slot_code":"lunch","fridge_terms":["concombre"],"recent_recipe_uuids":[]},
+  {"slot_date":"2026-07-08","slot_code":"dinner","fridge_terms":["poivron"],"recent_recipe_uuids":["r-gaspacho"]},
+  {"slot_date":"2026-08-04","slot_code":"lunch","fridge_terms":["melon"],"recent_recipe_uuids":[]},
+  {"slot_date":"2026-08-05","slot_code":"dinner","fridge_terms":["haricot"],"recent_recipe_uuids":["r-salade-ete"]},
+  {"slot_date":"2026-09-08","slot_code":"lunch","fridge_terms":["champignon"],"recent_recipe_uuids":[]},
+  {"slot_date":"2026-10-06","slot_code":"dinner","fridge_terms":["potimarron"],"recent_recipe_uuids":["r-veloute"]},
+  {"slot_date":"2026-11-03","slot_code":"lunch","fridge_terms":["chou"],"recent_recipe_uuids":[]},
+  {"slot_date":"2026-12-08","slot_code":"dinner","fridge_terms":["panais"],"recent_recipe_uuids":["r-gratin"]}
+]
