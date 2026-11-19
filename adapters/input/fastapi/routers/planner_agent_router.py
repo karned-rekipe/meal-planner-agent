@@ -13,15 +13,22 @@ from adapters.input.schemas.planner_agent_schema import (
     WeekProposalResponseSchema,
 )
 from application.services.planner_agent_service import PlannerAgentService
+from application.services.planner_execution_recorder import PlannerExecutionRecorder
 from arclith.adapters.input.fastapi.dependencies import get_duration_ms
 from arclith.adapters.input.schemas.response_wrapper import ApiResponse, ResponseMetadata, success_response
 from arclith.domain.ports.logger import Logger
 
 
 class PlannerAgentRouter:
-    def __init__(self, service: PlannerAgentService, logger: Logger) -> None:
+    def __init__(
+        self,
+        service: PlannerAgentService,
+        logger: Logger,
+        recorder: PlannerExecutionRecorder | None = None,
+    ) -> None:
         self._service = service
         self._logger = logger
+        self._recorder = recorder
         self.router = APIRouter(
             prefix="/v1/agent/meal-plans",
             tags=["meal-planner-agent"],
@@ -60,7 +67,12 @@ class PlannerAgentRouter:
         payload: SuggestItemRequestSchema,
         duration_ms: Annotated[float, Depends(get_duration_ms)],
     ) -> ApiResponse[SuggestItemResponseSchema]:
-        suggestions = self._service.suggest_item(payload.to_context())
+        suggestions = await self._execute(
+            name="suggest_meal_plan_item",
+            payload=payload.model_dump(mode="json"),
+            operation=lambda: self._service.suggest_item(payload.to_context()),
+            serialize=lambda result: [SuggestionSchema.from_domain(item).model_dump(mode="json") for item in result],
+        )
         self._logger.info("Meal-planner agent suggestions computed", count=len(suggestions))
         return success_response(
             SuggestItemResponseSchema(
@@ -75,7 +87,12 @@ class PlannerAgentRouter:
         duration_ms: Annotated[float, Depends(get_duration_ms)],
     ) -> ApiResponse[WeekProposalResponseSchema]:
         try:
-            proposal = self._service.propose_week(payload.to_context())
+            proposal = await self._execute(
+                name="propose_meal_plan_week",
+                payload=payload.model_dump(mode="json"),
+                operation=lambda: self._service.propose_week(payload.to_context()),
+                serialize=lambda result: WeekProposalResponseSchema.from_domain(result).model_dump(mode="json"),
+            )
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         self._logger.info(
@@ -93,7 +110,12 @@ class PlannerAgentRouter:
         payload: WeekIndicatorsRequestSchema,
         duration_ms: Annotated[float, Depends(get_duration_ms)],
     ) -> ApiResponse[WeekIndicatorsResponseSchema]:
-        indicators = self._service.compute_indicators(tuple(slot.to_domain() for slot in payload.slots))
+        indicators = await self._execute(
+            name="compute_meal_plan_week_indicators",
+            payload=payload.model_dump(mode="json"),
+            operation=lambda: self._service.compute_indicators(tuple(slot.to_domain() for slot in payload.slots)),
+            serialize=lambda result: WeekIndicatorsResponseSchema.from_domain(result).model_dump(mode="json"),
+        )
         self._logger.info(
             "Meal-planner agent indicators computed",
             planned_slots_count=indicators.planned_slots_count,
@@ -102,4 +124,15 @@ class PlannerAgentRouter:
         return success_response(
             WeekIndicatorsResponseSchema.from_domain(indicators),
             metadata=ResponseMetadata(duration_ms=int(duration_ms)),
+        )
+
+    async def _execute(self, *, name: str, payload: dict, operation, serialize):
+        if self._recorder is None:
+            return operation()
+        return await self._recorder.execute(
+            name=name,
+            input_payload=payload,
+            transport="rest",
+            operation=operation,
+            serialize=serialize,
         )

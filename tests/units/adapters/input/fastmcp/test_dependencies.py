@@ -1,7 +1,7 @@
 """Tests for adapters/input/fastmcp/dependencies.py."""
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import fastmcp
 
@@ -16,12 +16,11 @@ async def test_inject_tenant_uri_with_none_context():
 
 async def test_inject_tenant_uri_with_context():
     """Test inject_tenant_uri with a valid context."""
-    from adapters.input.fastmcp.dependencies import inject_tenant_uri
-    
     ctx = MagicMock(spec=fastmcp.Context)
-    
-    # Should not raise
-    await inject_tenant_uri(ctx)
+    with patch("adapters.input.fastmcp.dependencies._get_inject_fn", return_value=AsyncMock()) as factory:
+        from adapters.input.fastmcp.dependencies import inject_tenant_uri
+        await inject_tenant_uri(ctx)
+    factory.return_value.assert_awaited_once_with(ctx)
 
 
 def test_inject_fn_is_cached():
@@ -53,7 +52,8 @@ def test_require_auth_mcp_fn_is_cached():
         mock_config.return_value = mock_cfg
         
         # Clear cache first
-        from adapters.input.fastmcp.dependencies import _get_require_auth_mcp_fn
+        from adapters.input.fastmcp.dependencies import _get_config, _get_require_auth_mcp_fn
+        _get_config.cache_clear()
         _get_require_auth_mcp_fn.cache_clear()
         
         fn1 = _get_require_auth_mcp_fn()
@@ -61,6 +61,8 @@ def test_require_auth_mcp_fn_is_cached():
         
         # Should return the same instance
         assert fn1 is fn2
+        _get_config.cache_clear()
+        _get_require_auth_mcp_fn.cache_clear()
 
 
 async def test_require_auth_mcp_with_none_context_raises():
@@ -89,11 +91,14 @@ def test_require_auth_mcp_raises_without_keycloak_config():
         mock_config.return_value = mock_cfg
         
         # Clear cache
-        from adapters.input.fastmcp.dependencies import _get_require_auth_mcp_fn
+        from adapters.input.fastmcp.dependencies import _get_config, _get_require_auth_mcp_fn
+        _get_config.cache_clear()
         _get_require_auth_mcp_fn.cache_clear()
         
         with pytest.raises(RuntimeError, match="config.keycloak requis"):
             _get_require_auth_mcp_fn()
+        _get_config.cache_clear()
+        _get_require_auth_mcp_fn.cache_clear()
 
 
 async def test_require_auth_mcp_with_license_validator():
@@ -118,11 +123,14 @@ async def test_require_auth_mcp_with_license_validator():
         mock_config.return_value = mock_cfg
         
         # Clear cache
-        from adapters.input.fastmcp.dependencies import _get_require_auth_mcp_fn
+        from adapters.input.fastmcp.dependencies import _get_config, _get_require_auth_mcp_fn
+        _get_config.cache_clear()
         _get_require_auth_mcp_fn.cache_clear()
         
         # Should not raise during function creation
         fn = _get_require_auth_mcp_fn()
         assert callable(fn)
+        _get_config.cache_clear()
+        _get_require_auth_mcp_fn.cache_clear()
 
 

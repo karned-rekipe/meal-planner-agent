@@ -1,5 +1,6 @@
 from collections import Counter
 from datetime import date, timedelta
+from typing import Literal
 
 from domain.models.planner_agent import (
     CandidateRecipe,
@@ -13,7 +14,7 @@ from domain.models.planner_agent import (
 )
 
 MAX_PLAN_DAYS = 31
-SLOT_CODES = ("lunch", "dinner")
+SLOT_CODES: tuple[Literal["lunch", "dinner"], ...] = ("lunch", "dinner")
 
 
 class PlannerAgentService:
